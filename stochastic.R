@@ -7,10 +7,10 @@ m <- 1000
 times <- 1
 TNR_arr <- matrix(0,times,3)
 TPR_arr <- matrix(0,times,3)
-TNR_denominator <- p
-TPR_denominator <- 0
-model_selected_arr <- c()
+model_selected_arr <- rep(0,times)
 for(aa in 1:times){
+  TNR_denominator <- p
+  TPR_denominator <- 0
   set.seed(1000 + aa)
   corr_x <- matrix(rep(0,p*p),p,p)
   for (i in 1:p) {
@@ -147,7 +147,6 @@ for(aa in 1:times){
   M_hat_sigma <- (t(y - x[,M_hat] %*% M_hat_beta) %*% (y - x[,M_hat] %*% M_hat_beta)) / n
   visited_BIC <- c()
   model_selected <- FALSE
-  eigen(t(x[,M_hat])%*%x[,M_hat])
   M_hat_BIC <- -2 * sum(dnorm(y, x[,M_hat] %*% M_hat_beta, sqrt(M_hat_sigma), log = TRUE)) #+ (length(M_hat)) * log(n)
   #visited_s <- matrix(0,m,p)
   s <- c(1)
@@ -223,11 +222,11 @@ for(aa in 1:times){
         model_selected <- TRUE
       }
     }
-    model_selected_arr <- append(model_selected_arr,model_selected)
     #if(iter %% 100 == 0){
     #  cat("BIC 2nd",iter,"\n")
     #}
   }
+  model_selected_arr[aa] <- model_selected
   print(aa)
   #cat("EBIC",s_min,"\n",EBIC_s_min,"\n")
   #cat("BIC 1st",M_hat,"\n",M_hat_BIC,"\n")
@@ -237,6 +236,15 @@ BIC2nd_TNR_numerator <- TNR_denominator - sum(min_M %in% FALSE_values)
 TPR_arr[aa,3] <- BIC2nd_TPR_numerator / TPR_denominator
 TNR_arr[aa,3] <- BIC2nd_TNR_numerator / TNR_denominator
 }
+
+mean(TNR_arr[,1])
+mean(TNR_arr[,3])
+mean(TPR_arr[,1])
+mean(TPR_arr[,3])
+model_selected_arr
+boxplot(TNR_arr[,1],TNR_arr[,3])
+boxplot(TPR_arr[,1],TPR_arr[,3])
+
 for(i in 1:times){
   cat("EBIC", i, "th TPR:", TPR_arr[i,1],"\n")
   cat("BIC first stochatic", i, "th TPR:", TPR_arr[i,2],"\n")
